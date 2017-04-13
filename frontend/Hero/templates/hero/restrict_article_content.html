@@ -1,0 +1,119 @@
+{% extends 'hero/welcome.html' %}
+{% block content %}
+<div class="right_col" role="main">
+    <div class="">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>{{ context.rsp_body.article.title }}<small></small></h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_content">
+                        <div class="table-responsive">
+                            {% for content in context.rsp_body.article.content %}
+                                {{ content }}
+                                <br>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- /remove module-->
+{% endblock %}
+
+{% block import_css %}
+{% load static %}
+    <link href="{% static "css/style.css" %}" rel="stylesheet">    
+    <link href="{% static "css/green.css" %}" rel="stylesheet">    
+    <link href="{% static "css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block import_js %}
+    <script src="{% static "js/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "js/dataTables.bootstrap.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-paginator.js" %}"></script>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            var has_previous = {{ context.rsp_body.articles.has_previous|lower }}
+            var has_next = {{ context.rsp_body.articles.has_next|lower }}
+            var current_page = {{ context.rsp_body.articles.number }}
+            var total_page = {{ context.rsp_body.articles.paginator.num_pages }}
+            var page_default = 5
+
+            if (has_previous) {
+                $('.pagination').append(
+                    '<li>' + 
+                        '<a href="?page=' + (current_page - 1) + '" aria-label="Previous">' +
+                            '<span aria-hidden="true">&laquo;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+            else {
+                $('.pagination').append(
+                    '<li class="disabled">' + 
+                        '<a href="#" aria-label="Previous">' +
+                            '<span aria-hidden="true">&laquo;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+
+            if (current_page <= page_default) {
+                fill_page(1, current_page, page_default)
+            }
+            else if (current_page >= total_page - page_default + 1) {
+                fill_page(total_page - page_default + 1, current_page, total_page + 1)
+            }
+            else {
+                fill_page(current_page - 2, current_page, current_page + 2)
+            }
+
+            if (has_next) {
+                $('.pagination').append(
+                    '<li>' + 
+                        '<a href="?page=' + (current_page + 1) + '" aria-label="Next">' +
+                            '<span aria-hidden="true">&raquo;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+            else {
+                $('.pagination').append(
+                    '<li class="disabled">' + 
+                        '<a href="#" aria-label="Next">' +
+                            '<span aria-hidden="true">&raquo;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+
+        });
+
+   
+        function fill_page(fooler, current_page, ceiling) {
+            for (index = fooler; index < current_page; index++) {
+                $('.pagination').append(
+                    '<li><a href="?page=' + index + '">' + index + '</a></li>'
+                )
+            }
+            $('.pagination').append(
+                '<li class="active"><a href="?page=' + current_page + '">' + current_page + '</a></li>'
+            )
+            for (index = current_page + 1; index < ceiling + 1; index++) {
+                $('.pagination').append(
+                    '<li><a href="?page=' + index + '">' + index + '</a></li>'
+                )
+            }
+        }
+    </script>
+{% endblock %}

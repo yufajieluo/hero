@@ -1,0 +1,210 @@
+{% extends 'hero/welcome.html' %}
+{% block content %}
+<div class="right_col" role="main">
+    <div class="">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h2>图片列表<small></small></h2>
+                        <div class="clearfix"></div>
+                    </div>
+                    <div class="x_search">
+                        <form method="GET" action="/hero/restrict/photograph/">
+                            <div class="input-group input-group-custom">
+                                <input id="search_title" name="search_title" type="text" class="form-control">
+                                <span class="input-group-btn">
+                                    <button id="button_search" class="btn btn-primary submit">搜索</button>
+                                </span>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="x_content">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>主题</th>
+                                        <th>作者</th>
+                                        <th>发布时间</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for picture in context.rsp_body.pictures %}
+                                        <tr>
+                                            <td><a href="/hero/restrict/photograph/content?title={{ picture.title }}" target="_blank">{{ picture.title }}</a></td>
+                                            <td>{{ picture.author }}</td>
+                                            <td>{{ picture.create_time }}</td>
+                                            <td>
+                                                <button type="button" style="margin-bottom:0px" class="btn btn-primary btn-xs btnEssenceArticle" data-toggle="modal" data-target=".essenceArticle">
+                                                    <i class="fa fa-male"></i> 申精
+                                                </button>
+                                                <button type="button" style="margin-bottom:0px" class="btn btn-danger btn-xs btnRemoveArticle" data-toggle="modal" data-target=".removeArticle">
+                                                    <i class="fa fa-cog"></i> 删除
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <nav aria-label="paging">
+                            <ul class="pagination ul-custom">
+                            </ul>
+                            <!--input type="number" class="input-custom" onkeydown="if(event.keyCode==13){console.log('回车')}"-->
+                            <input id="jump_target_page" type="number" class="input-custom" onkeydown="jump_page()">
+                            <span class="page-custom">
+                                Page {{ context.rsp_body.pictures.number }} of {{ context.rsp_body.pictures.paginator.num_pages }}
+                            </span>
+                        </nav>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--essence module-->
+<div class="modal fade essenceArticle" tabindex="-1" role="dialog" aria-labelledby="ModalPsd" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="ModalPsd">确定申精？</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" style="margin-bottom:0px" data-dismiss="modal">取消</button>
+                <button id="button_essence_picture" type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /essence module-->
+
+<!--remove module-->
+<div class="modal fade removeArticle" tabindex="-1" role="dialog" aria-labelledby="ModalPsd" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="ModalPsd">确定删除？</h4>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" style="margin-bottom:0px" data-dismiss="modal">取消</button>
+                <button id="button_remove_picture" type="button" class="btn btn-primary" data-dismiss="modal">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /remove module-->
+{% endblock %}
+
+{% block import_css %}
+{% load static %}
+    <link href="{% static "css/style.css" %}" rel="stylesheet">    
+    <link href="{% static "css/green.css" %}" rel="stylesheet">    
+    <link href="{% static "css/dataTables.bootstrap.min.css" %}" rel="stylesheet">
+{% endblock %}
+
+{% block import_js %}
+    <script src="{% static "js/jquery.dataTables.min.js" %}"></script>
+    <script src="{% static "js/dataTables.bootstrap.min.js" %}"></script>
+    <script src="{% static "js/bootstrap-paginator.js" %}"></script>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        $(document).ready(function() {
+            var has_previous = {{ context.rsp_body.pictures.has_previous|lower }}
+            var has_next = {{ context.rsp_body.pictures.has_next|lower }}
+            var current_page = {{ context.rsp_body.pictures.number }}
+            var total_page = {{ context.rsp_body.pictures.paginator.num_pages }}
+            var page_default = 10
+            
+            if (has_previous) {
+                $('.pagination').append(
+                    '<li>' + 
+                        '<a href="?page=' + 1 + '" aria-label="Previous">' +
+                            '<span aria-hidden="true">&lt;&lt</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+                $('.pagination').append(
+                    '<li>' + 
+                        '<a href="?page=' + (current_page - 1) + '" aria-label="Previous">' +
+                            '<span aria-hidden="true">&lt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+            else {
+                $('.pagination').append(
+                    '<li class="disabled">' + 
+                        '<a href="#" aria-label="Previous">' +
+                            '<span aria-hidden="true">&lt;&lt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+                $('.pagination').append(
+                    '<li class="disabled">' + 
+                        '<a href="#" aria-label="Previous">' +
+                            '<span aria-hidden="true">&lt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+
+            if (current_page <= page_default) {
+                if (total_page > page_default) {
+                    fill_page(1, current_page, page_default)
+                }
+                else {
+                    fill_page(1, current_page, total_page)
+                }
+            }
+            else if (current_page >= total_page - page_default/2 + 1) {
+                fill_page(total_page - page_default + 1, current_page, total_page)
+            }
+            else {
+                fill_page(current_page - page_default/2 - 1, current_page, current_page + page_default/2)
+            }
+
+            if (has_next) {
+                $('.pagination').append(
+                    '<li>' + 
+                        '<a href="?page=' + (current_page + 1) + '" aria-label="Next">' +
+                            '<span aria-hidden="true">&gt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+                $('.pagination').append(
+                    '<li>' + 
+                        '<a href="?page=' + (total_page) + '" aria-label="Next">' +
+                            '<span aria-hidden="true">&gt;&gt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+            else {
+                $('.pagination').append(
+                    '<li class="disabled">' + 
+                        '<a href="#" aria-label="Next">' +
+                            '<span aria-hidden="true">&gt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+                $('.pagination').append(
+                    '<li class="disabled">' + 
+                        '<a href="#" aria-label="Next">' +
+                            '<span aria-hidden="true">&gt;&gt;</span>' +
+                        '</a>' +
+                    '</li>'
+                )
+            }
+
+        });
+    </script>
+{% endblock %}
